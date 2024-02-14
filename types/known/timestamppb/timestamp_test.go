@@ -202,6 +202,7 @@ func TestTimestampUnmarshalJSON(t *testing.T) {
 		{in: `""`, want: &tspb.Timestamp{Seconds: 0, Nanos: 0}},
 		{in: ``, want: &tspb.Timestamp{Seconds: 0, Nanos: 0}},
 		{in: `"2024-02-06T15:47:04.627731624Z"`, want: &tspb.Timestamp{Seconds: 1707234424, Nanos: 627731624}},
+		{in: `{"seconds": 1707234424, "nanos": 627731624}`, want: &tspb.Timestamp{Seconds: 1707234424, Nanos: 627731624}},
 	}
 
 	for _, tt := range tests {

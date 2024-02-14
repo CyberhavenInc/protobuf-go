@@ -14,14 +14,25 @@ package timestamppb
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
 	if string(b) == "null" || string(b) == "" || string(b) == "\"\"" {
-		t = &Timestamp{Seconds: 0, Nanos: 0}
 		return nil
+	}
+
+	var tj map[string]interface{}
+	if err := json.Unmarshal(b, &tj); err == nil {
+		// TODO set the values of the timestamp
+		sec, secOk := tj["seconds"].(float64)
+		nanos, nanosOk := tj["nanos"].(float64)
+		if secOk && nanosOk {
+			*t = *New(time.Unix(int64(sec), int64(nanos)))
+			return nil
+		}
 	}
 
 	var tim time.Time
@@ -31,10 +42,6 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 
 	*t = *New(tim)
 	return nil
-}
-
-func (t *Timestamp) MarshalJSON() ([]byte, error) {
-	return t.AsTime().MarshalJSON()
 }
 
 func (t *Timestamp) EncodeSpanner() (interface{}, error) {
