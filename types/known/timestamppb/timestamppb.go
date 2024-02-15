@@ -16,6 +16,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -24,18 +25,20 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 
-	var tj map[string]interface{}
-	if err := json.Unmarshal(b, &tj); err == nil {
-		sec, secOk := tj["seconds"].(float64)
-		if secOk {
-			*t = *New(time.Unix(int64(sec), 0))
-		}
-		nanos, nanosOk := tj["nanos"].(float64)
-		if nanosOk {
-			t.Nanos = int32(nanos)
-		}
+	if strings.HasPrefix(string(b), "{") {
+		var tj map[string]interface{}
+		if err := json.Unmarshal(b, &tj); err == nil {
+			sec, secOk := tj["seconds"].(float64)
+			if secOk {
+				*t = *New(time.Unix(int64(sec), 0))
+			}
+			nanos, nanosOk := tj["nanos"].(float64)
+			if nanosOk {
+				t.Nanos = int32(nanos)
+			}
 
-		return nil
+			return nil
+		}
 	}
 
 	var tim time.Time
